@@ -2,15 +2,15 @@ use std::{io, time::Duration};
 
 use tokio::{io::AsyncWriteExt, net::TcpStream, time::sleep};
 
-macro_rules! with {
-    ($selph:ident, $op:ident, $arg:expr) => {{
+macro_rules! with_stream {
+    ($selph:ident, $method:ident, $($args:expr),+) => {{
         if $selph.stream.is_none() {
             let stream = TcpStream::connect($selph.addr.as_str()).await?;
             $selph.stream = Some(stream);
         }
         let result = {
             let stream = $selph.stream.as_mut().unwrap();
-            stream.$op($arg).await
+            stream.$method($($args),+).await
         };
         if result.is_err() {
             $selph.stream = None;
@@ -33,7 +33,7 @@ impl Worker {
     }
 
     async fn send(&mut self, msg: &[u8]) -> io::Result<()> {
-        with!(self, write_all, msg)
+        with_stream!(self, write_all, msg)
     }
 }
 
