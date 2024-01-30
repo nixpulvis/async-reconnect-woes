@@ -1,0 +1,8 @@
+[package]
+name = "async-reconnect-woes"
+version = "0.0.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { version = "1.0.79", features = ["backtrace"] }
+tokio = { version = "1.35.1", features = ["full"] }

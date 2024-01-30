@@ -1,2 +1,2 @@
-rust-session-reset-async-cannot-assign-because-borrowed
+Attempts to Asyncify Reconnect
 ===============================================================================
