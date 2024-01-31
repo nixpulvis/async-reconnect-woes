@@ -4,14 +4,21 @@ use tokio::{io::AsyncWriteExt, net::TcpStream, time::sleep};
 
 macro_rules! with_stream {
     ($selph:ident, $method:ident, $($args:expr),+) => {{
-        if $selph.stream.is_none() {
-            let stream = TcpStream::connect($selph.addr.as_str()).await?;
-            $selph.stream = Some(stream);
-        }
-        let result = {
-            let stream = $selph.stream.as_mut().unwrap();
-            stream.$method($($args),+).await
-        };
+        let result =
+            match $selph.stream {
+                Some(ref mut s) =>
+                    s.$method($($args),+).await,
+                None => {
+                    match TcpStream::connect($selph.addr.as_str()).await {
+                        Err(e) =>Err(e),
+                        Ok(stream) => {
+                            $selph.stream = Some(stream);
+                            let stream = $selph.stream.as_mut().unwrap();
+                            stream.$method($($args),+).await
+                        }
+                    }
+                }
+            };
         if result.is_err() {
             $selph.stream = None;
         }
